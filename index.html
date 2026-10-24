@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Spider Mess Tracker</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at 10% 10%,#e11d4833,transparent 30%),radial-gradient(circle at 90% 90%,#2563eb33,transparent 30%),#050816;color:white;min-height:100vh}
+#loginPage{min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+.loginBox{width:100%;max-width:380px;padding:30px 25px;border-radius:22px;background:#111827ee;border:2px solid #e11d48;box-shadow:0 0 30px #e11d4844}
+.logo{width:80px;height:80px;margin:auto;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:42px;background:#dc163c;border:3px solid white}
+.loginBox h1{text-align:center;color:#fb355b;margin:15px 0 5px}.sub{text-align:center;color:#94a3b8;font-size:11px;letter-spacing:2px;margin-bottom:25px}
+.loginBox label{display:block;color:#cbd5e1;font-size:12px;margin-top:10px}
+.loginBox input{width:100%;padding:13px;margin-top:6px;border-radius:9px;border:1px solid #475569;background:#020617;color:white;outline:none}
+.loginBox input:focus{border-color:#e11d48}
+.loginBtn,.createBtn{width:100%;padding:13px;margin-top:15px;border-radius:9px;font-weight:bold;cursor:pointer}
+.loginBtn{border:0;color:white;background:linear-gradient(135deg,#dc163c,#2563eb)}
+.createBtn{background:#020617;color:#60a5fa;border:1px solid #2563eb}
+#error{display:none;margin-top:12px;padding:10px;text-align:center;background:#7f1d1d;color:#fecaca;border-radius:8px;font-size:12px}
+#dashboard{display:none}
+header{position:sticky;top:0;z-index:10;background:#020617ee;border-bottom:1px solid #e11d4866;padding:12px;backdrop-filter:blur(10px)}
+.headerInside{max-width:550px;margin:auto;display:flex;justify-content:space-between;align-items:center}
+.title{color:#fb355b;font-size:20px;font-weight:bold}.logged{color:#64748b;font-size:10px;margin-top:3px}.logged span{color:#60a5fa}
+.logout{padding:8px 11px;border-radius:8px;color:#fca5a5;background:#7f1d1d55;border:1px solid #e11d48;cursor:pointer}
+.container{max-width:550px;margin:auto;padding:12px}
+.dayBox,.member,.bill{background:#111827dd;border:1px solid #334155;border-radius:16px}
+.dayBox{padding:12px;margin-bottom:12px}.dayButtons{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.dayBtn{padding:9px 2px;border-radius:8px;border:1px solid #334155;background:#020617;color:#94a3b8;font-size:9px;cursor:pointer}
+.dayBtn.active{background:linear-gradient(135deg,#dc163c,#2563eb);color:white;border-color:transparent}
+.prices{text-align:center;color:#94a3b8;font-size:10px;margin-top:10px}
+.member{padding:13px;margin-bottom:10px;transition:.2s}.member:hover{border-color:#e11d48;transform:translateY(-2px);box-shadow:0 0 18px #e11d4822}.member:active{transform:scale(.98)}
+.memberName{font-weight:bold;font-size:14px;margin-bottom:10px;transition:.2s}.member:hover .memberName{color:#fb355b;text-shadow:0 0 10px #e11d48}
+.meals{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.meal{text-align:center;padding:9px 3px;border-radius:10px;background:#020617;border:1px solid #334155}
+.mealIcon{font-size:20px}.mealName{font-size:9px;color:#94a3b8;margin-top:3px}.meal input{width:18px;height:18px;margin-top:6px;accent-color:#e11d48}
+.extra{display:flex;justify-content:space-between;align-items:center;margin-top:10px}.extra span{color:#94a3b8;font-size:10px}.extra input{width:100px;padding:8px;border-radius:8px;border:1px solid #334155;background:#020617;color:white;text-align:right;outline:none}
+.bill{padding:15px;margin-top:12px}.row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #33415555}.row:last-child{border-bottom:0}.row span:first-child{color:#94a3b8;font-size:12px}.amount{color:#60a5fa;font-weight:bold}.total{color:#4ade80;font-size:17px;font-weight:bold}
+.action{width:100%;padding:13px;margin-top:8px;border-radius:9px;cursor:pointer;font-size:14px;font-weight:bold}.save{border:0;color:white;background:linear-gradient(135deg,#dc163c,#2563eb)}.weekpdf{background:#111827;color:#f87171;border:1px solid #e11d48}.pdf{background:#111827;color:#60a5fa;border:1px solid #2563eb}.reset{background:#111827;color:#fca5a5;border:1px solid #7f1d1d}.status{text-align:center;color:#64748b;font-size:10px;margin:12px}
+@media(max-width:380px){.title{font-size:17px}.dayBtn{font-size:8px;padding:8px 1px}}
+</style>
+</head>
+<body>
+<div id="loginPage">
+  <div class="loginBox">
+    <div class="logo">🕷️</div>
+    <h1>SPIDER MESS</h1>
+    <div class="sub">MESS TRACKER</div>
+    <label for="username">Username</label>
+    <input id="username" type="text" placeholder="Enter username" autocomplete="username">
+    <label for="password">Password</label>
+    <input id="password" type="password" placeholder="Enter password" autocomplete="current-password">
+    <button class="loginBtn" onclick="login()">🔐 LOGIN</button>
+    <button class="createBtn" onclick="createAccount()">➕ CREATE ACCOUNT</button>
+    <div id="error" role="alert"></div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <header>
+    <div class="headerInside">
+      <div><div class="title">🕷️ SPIDER MESS</div><div class="logged">Logged in: <span id="loggedUser"></span></div></div>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+  </header>
+  <div class="container">
+    <div class="dayBox">
+      <div class="dayButtons">
+        <button class="dayBtn active" onclick="changeDay(0)">MON</button>
+        <button class="dayBtn" onclick="changeDay(1)">TUE</button>
+        <button class="dayBtn" onclick="changeDay(2)">WED</button>
+        <button class="dayBtn" onclick="changeDay(3)">THU</button>
+        <button class="dayBtn" onclick="changeDay(4)">FRI</button>
+        <button class="dayBtn" onclick="changeDay(5)">SAT</button>
+        <button class="dayBtn" onclick="changeDay(6)">SUN</button>
+      </div>
+      <div class="prices">1 Meal = ₹45 &nbsp; | &nbsp; 2 Meals = ₹90 &nbsp; | &nbsp; 3 Meals = ₹120</div>
+    </div>
+    <div id="members"></div>
+    <div class="bill">
+      <div class="row"><span>Today's Meals</span><span class="amount" id="mealCount">0</span></div>
+      <div class="row"><span>Food Bill</span><span class="amount">₹<span id="foodBill">0</span></span></div>
+      <div class="row"><span>Extra Amount</span><span class="amount">₹<span id="extraBill">0</span></span></div>
+      <div class="row"><span>Today's Total</span><span class="total">₹<span id="todayTotal">0</span></span></div>
+      <div class="row"><span>Weekly Total</span><span class="total">₹<span id="weeklyTotal">0</span></span></div>
+    </div>
+    <button class="action save" onclick="saveDay()">💾 SAVE DAY</button>
+    <button class="action weekpdf" onclick="weeklyDayPDF()">📅 DOWNLOAD DAY-WISE BILL</button>
+    <button class="action pdf" onclick="personWisePDF()">👤 DOWNLOAD PERSON-WISE BILL</button>
+    <button class="action reset" onclick="resetData()">🗑️ RESET MY DATA</button>
+    <div class="status" id="status">Ready</div>
+  </div>
+</div>
+
+<script>
+const members=["Sabari Ananth N","Vishwa P","Ijaas","Kalai","Dharson"] ;
+const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+let currentUser="",selectedDay=0,data={};
+
+function getAccounts(){
+  try{return JSON.parse(localStorage.getItem("messAccounts")||"{}");}
+  catch{return {};}
+}
+function showError(message){
+  const e=document.getElementById("error");
+  e.textContent=message;e.style.display="block";
+}
+function createAccount(){
+  const u=document.getElementById("username").value.trim();
+  const p=document.getElementById("password").value;
+  if(u.length<3)return showError("Username must contain at least 3 characters.");
+  if(p.length<4)return showError("Password must contain at least 4 characters.");
+  const a=getAccounts();
+  if(a[u])return showError("Username already exists.");
+  a[u]=p;localStorage.setItem("messAccounts",JSON.stringify(a));
+  document.getElementById("password").value="";
+  document.getElementById("error").style.display="none";
+  alert("Account created successfully! ✅\nNow login.");
+}
+function login(){
+  const u=document.getElementById("username").value.trim();
+  const p=document.getElementById("password").value;
+  const a=getAccounts();
+  if(!u||!p)return showError("Please enter username and password.");
+  if(!a[u])return showError("Username not found. Create an account first.");
+  if(a[u]!==p)return showError("Incorrect password.");
+  currentUser=u;localStorage.setItem("messCurrentUser",u);
+  document.getElementById("error").style.display="none";openDashboard();
+}
+function openDashboard(){
+  document.getElementById("loginPage").style.display="none";
+  document.getElementById("dashboard").style.display="block";
+  document.getElementById("loggedUser").textContent=currentUser;
+  loadUserData();createMembers();changeDay(0);
+}
+function loadUserData(){
+  try{data=JSON.parse(localStorage.getItem("messData_"+currentUser)||"{}");}
+  catch{data={};}
+}
+function saveUserData(){localStorage.setItem("messData_"+currentUser,JSON.stringify(data));}
+function createMembers(){
+  let html="";
+  members.forEach((name,index)=>{
+    html+=`<div class="member">
+      <div class="memberName">🕷️ ${name}</div>
+      <div class="meals">
+        <label class="meal"><div class="mealIcon">🌅</div><div class="mealName">Morning</div><input type="checkbox" data-member="${index}" data-meal="0" onchange="calculate()"></label>
+        <label class="meal"><div class="mealIcon">🌆</div><div class="mealName">Evening</div><input type="checkbox" data-member="${index}" data-meal="1" onchange="calculate()"></label>
+        <label class="meal"><div class="mealIcon">🌙</div><div class="mealName">Night</div><input type="checkbox" data-member="${index}" data-meal="2" onchange="calculate()"></label>
+      </div>
+      <div class="extra"><span>➕ Extra Amount</span><input type="number" min="0" step="1" placeholder="₹ 0" data-extra="${index}" oninput="calculate()"></div>
+    </div>`;
+  });
+  document.getElementById("members").innerHTML=html;
+}
+function changeDay(day){
+  // Keep edits when switching days, so unsaved checkboxes are not lost.
+  if(document.getElementById("dashboard").style.display==="block")saveCurrentData(false);
+  selectedDay=day;
+  document.querySelectorAll(".dayBtn").forEach((b,i)=>b.classList.toggle("active",i===day));
+  loadDay();
+}
+function loadDay(){
+  const s=data[selectedDay];
+  const boxes=document.querySelectorAll('#members input[type="checkbox"]');
+  boxes.forEach((b,i)=>b.checked=!!(s&&s.meals&&s.meals[i]));
+  document.querySelectorAll(".extra input").forEach((x,i)=>x.value=s&&s.extra?(s.extra[i]||""):"");
+  calculate();
+}
+function getCurrentEntry(){
+  const meals=[],extra=[];
+  document.querySelectorAll('#members input[type="checkbox"]').forEach(b=>meals.push(b.checked));
+  document.querySelectorAll(".extra input").forEach(x=>extra.push(Math.max(0,Number(x.value||0))));
+  return {meals,extra};
+}
+function calculate(){
+  let mealCount=0,foodBill=0,extraBill=0;
+  members.forEach((m,i)=>{
+    let c=0;
+    document.querySelectorAll('#members input[type="checkbox"]').forEach(b=>{
+      if(Number(b.dataset.member)===i&&b.checked)c++;
+    });
+    mealCount+=c;
+    if(c===1)foodBill+=45;
+    if(c===2)foodBill+=90;
+    if(c===3)foodBill+=120;
+    const x=document.querySelector('input[data-extra="'+i+'"]');
+    if(x)extraBill+=Math.max(0,Number(x.value||0));
+  });
+  document.getElementById("mealCount").textContent=mealCount;
+  document.getElementById("foodBill").textContent=foodBill;
+  document.getElementById("extraBill").textContent=extraBill;
+  document.getElementById("todayTotal").textContent=foodBill+extraBill;
+  calculateWeekly();
+}
+function saveDay(){
+  saveCurrentData(true);
+  document.getElementById("status").textContent=days[selectedDay]+" saved successfully ✅";
+  calculate();
+}
+function saveCurrentData(showStatus=true){
+  if(!currentUser)return;
+  data[selectedDay]=getCurrentEntry();
+  saveUserData();
+  if(showStatus)document.getElementById("status").textContent=days[selectedDay]+" saved successfully ✅";
+}
+function dayTotals(s){
+  let mealCount=0,food=0,extra=0;
+  if(s){
+    members.forEach((m,i)=>{
+      const st=i*3;let c=0;
+      if(s.meals){if(s.meals[st])c++;if(s.meals[st+1])c++;if(s.meals[st+2])c++;}
+      mealCount+=c;
+      if(c===1)food+=45;if(c===2)food+=90;if(c===3)food+=120;
+      if(s.extra)extra+=Math.max(0,Number(s.extra[i]||0));
+    });
+  }
+  return {mealCount,food,extra,total:food+extra};
+}
+function calculateWeekly(){
+  let total=0;
+  for(let day=0;day<7;day++)total+=dayTotals(data[day]).total;
+  document.getElementById("weeklyTotal").textContent=total;
+}
+function loadPDF(callback){
+  if(window.jspdf)return callback();
+  const s=document.createElement("script");
+  s.src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+  s.onload=callback;
+  s.onerror=()=>alert("PDF library could not load. Check your internet connection.");
+  document.body.appendChild(s);
+}
+function weeklyDayPDF(){
+  saveCurrentData(false);
+  loadPDF(()=>{
+    const {jsPDF}=window.jspdf,pdf=new jsPDF();
+    let y=18,gM=0,gF=0,gE=0,gT=0;
+    pdf.setFontSize(18);pdf.text("SPIDER MESS BILL",105,y,{align:"center"});y+=7;
+    pdf.setFontSize(10);pdf.text("7-DAY DAY-WISE BILL",105,y,{align:"center"});y+=6;
+    pdf.setFontSize(9);pdf.text("User: "+currentUser,105,y,{align:"center"});y+=13;
+    pdf.setFontSize(10);pdf.text("DAY",15,y);pdf.text("MEALS",65,y);pdf.text("FOOD",105,y);pdf.text("EXTRA",145,y);pdf.text("TOTAL",180,y);pdf.line(10,y+3,200,y+3);y+=11;
+    for(let day=0;day<7;day++){
+      const t=dayTotals(data[day]);gM+=t.mealCount;gF+=t.food;gE+=t.extra;gT+=t.total;
+      pdf.text(days[day],15,y);pdf.text(String(t.mealCount),65,y);pdf.text("Rs."+t.food,105,y);pdf.text("Rs."+t.extra,145,y);pdf.text("Rs."+t.total,180,y);y+=10;
+    }
+    pdf.line(10,y,200,y);y+=11;pdf.setFontSize(11);
+    pdf.text("GRAND TOTAL",15,y);pdf.text(String(gM),65,y);pdf.text("Rs."+gF,105,y);pdf.text("Rs."+gE,145,y);pdf.text("Rs."+gT,180,y);
+    y+=15;pdf.setFontSize(8);pdf.text("1 Meal = Rs.45 | 2 Meals = Rs.90 | 3 Meals = Rs.120",105,y,{align:"center"});y+=7;
+    pdf.text("Generated by Spider Mess Tracker",105,y,{align:"center"});
+    pdf.save("Day-Wise-Weekly-Bill.pdf");
+  });
+}
+function personWisePDF(){
+  saveCurrentData(false);
+  loadPDF(()=>{
+    const {jsPDF}=window.jspdf,pdf=new jsPDF();
+    let y=18,gM=0,gF=0,gE=0,gT=0;
+    pdf.setFontSize(18);pdf.text("SPIDER MESS BILL",105,y,{align:"center"});y+=7;
+    pdf.setFontSize(10);pdf.text("7-DAY PERSON-WISE REFERENCE",105,y,{align:"center"});y+=6;
+    pdf.setFontSize(9);pdf.text("User: "+currentUser,105,y,{align:"center"});y+=13;
+    pdf.setFontSize(9);pdf.text("MEMBER",10,y);pdf.text("MEALS",85,y);pdf.text("FOOD",115,y);pdf.text("EXTRA",150,y);pdf.text("TOTAL",180,y);pdf.line(10,y+3,200,y+3);y+=10;
+    members.forEach((m,i)=>{
+      let tm=0,ff=0,ee=0;
+      for(let day=0;day<7;day++){
+        const s=data[day];if(!s)continue;
+        const st=i*3;let c=0;
+        if(s.meals){if(s.meals[st])c++;if(s.meals[st+1])c++;if(s.meals[st+2])c++;}
+        tm+=c;if(c===1)ff+=45;if(c===2)ff+=90;if(c===3)ff+=120;
+        if(s.extra)ee+=Math.max(0,Number(s.extra[i]||0));
+      }
+      const tt=ff+ee;gM+=tm;gF+=ff;gE+=ee;gT+=tt;
+      pdf.text(m,10,y);pdf.text(String(tm),85,y);pdf.text("Rs."+ff,115,y);pdf.text("Rs."+ee,150,y);pdf.text("Rs."+tt,180,y);y+=9;
+    });
+    pdf.line(10,y,200,y);y+=11;pdf.setFontSize(10);
+    pdf.text("GRAND TOTAL",10,y);pdf.text(String(gM),85,y);pdf.text("Rs."+gF,115,y);pdf.text("Rs."+gE,150,y);pdf.text("Rs."+gT,180,y);
+    y+=15;pdf.setFontSize(8);pdf.text("1 Meal = Rs.45 | 2 Meals = Rs.90 | 3 Meals = Rs.120",105,y,{align:"center"});y+=7;
+    pdf.text("Generated by Spider Mess Tracker",105,y,{align:"center"});
+    pdf.save("Person-Wise-Weekly-Bill.pdf");
+  });
+}
+function resetData(){
+  if(!confirm("Delete all your mess data?"))return;
+  localStorage.removeItem("messData_"+currentUser);data={};loadDay();
+  document.getElementById("status").textContent="All your data has been reset.";
+}
+function logout(){
+  currentUser="";data={};localStorage.removeItem("messCurrentUser");
+  document.getElementById("dashboard").style.display="none";
+  document.getElementById("loginPage").style.display="flex";
+  document.getElementById("username").value="";
+  document.getElementById("password").value="";
+  document.getElementById("error").style.display="none";
+}
+const savedUser=localStorage.getItem("messCurrentUser");
+if(savedUser){currentUser=savedUser;openDashboard();}
+</script>
+</body>
+</html>
